@@ -3,8 +3,6 @@ import type { JigsawPieceState } from "../types/puzzle";
 
 type UseJigsawDragParams = {
   piece: JigsawPieceState;
-  originX: number;
-  originY: number;
   onDragStart: (pieceId: string) => void;
   onDragMove: (pieceId: string, x: number, y: number) => void;
   onDragEnd: (pieceId: string, pointerType: string) => void;
@@ -12,8 +10,6 @@ type UseJigsawDragParams = {
 
 export const useJigsawDrag = ({
   piece,
-  originX,
-  originY,
   onDragStart,
   onDragMove,
   onDragEnd,
@@ -29,8 +25,8 @@ export const useJigsawDrag = ({
     event.currentTarget.setPointerCapture(event.pointerId);
     draggingRef.current = true;
     offsetRef.current = {
-      x: event.clientX - originX - piece.x,
-      y: event.clientY - originY - piece.y,
+      x: event.clientX - piece.x,
+      y: event.clientY - piece.y,
     };
     onDragStart(piece.id);
   };
@@ -40,11 +36,7 @@ export const useJigsawDrag = ({
       return;
     }
 
-    onDragMove(
-      piece.id,
-      event.clientX - originX - offsetRef.current.x,
-      event.clientY - originY - offsetRef.current.y,
-    );
+    onDragMove(piece.id, event.clientX - offsetRef.current.x, event.clientY - offsetRef.current.y);
   };
 
   const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {

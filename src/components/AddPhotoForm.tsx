@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { saveImage, savePuzzle } from "../lib/db";
-import { createId, IMAGE_MAX_SIZE, resizeImageToBlob, THUMBNAIL_MAX_SIZE } from "../lib/imageUtils";
+import { createId, resizeImageToBlob } from "../lib/imageUtils";
 import { PUZZLE_MODE_DESCRIPTIONS, PUZZLE_MODE_LABELS } from "../lib/puzzleMode";
 import type { PuzzleItem, PuzzleMode, StoredImage } from "../types/puzzle";
 
@@ -70,8 +70,8 @@ export function AddPhotoForm({ onSaved, onCancel }: AddPhotoFormProps) {
     setIsSaving(true);
     try {
       const now = new Date().toISOString();
-      const imageBlob = await resizeImageToBlob(selectedFile, IMAGE_MAX_SIZE);
-      const thumbnailBlob = await resizeImageToBlob(selectedFile, THUMBNAIL_MAX_SIZE);
+      const imageBlob = await resizeImageToBlob(selectedFile, 1200);
+      const thumbnailBlob = await resizeImageToBlob(selectedFile, 300);
       const imageId = createId();
       const thumbnailId = createId();
 

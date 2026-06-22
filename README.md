@@ -1,30 +1,60 @@
 # しゃしんパズルコレクション
 
-React / TypeScript / Vite 製の写真パズルアプリです。端末内の画像やカメラで撮った写真を保存し、タイルパズルまたはジグソーパズルとして遊べます。
+ブラウザ上だけで動く、React / TypeScript / Vite 製の写真パズルアプリです。端末内の写真やスマホカメラで撮った写真を保存し、タイルパズルまたはジグソーパズルとして何度でも遊べます。
 
-公開URL:
+## アプリ概要
 
-https://altogrow-ir.github.io/photo-puzzle-medal/
-
-## 主な機能
-
-- 写真ファイル選択、スマホ・タブレットのカメラ撮影に対応
-- タイルパズルとジグソーパズルを選択可能
+- 写真ファイル選択、スマホカメラ撮影に対応
 - 3×3、4×4、5×5、6×6、8×8 のピース数を選択可能
-- 写真Blobとパズル情報を IndexedDB に保存
-- パズル途中経過の一時保存と「つづきから」再開
-- 完成時のメダル、称号、完成画像保存
-- GitHub Pages 公開に対応
+- タイルパズルモードとジグソーパズルモードを選択可能
+- Canvasで画像を縮小してからIndexedDBへ保存
+- 保存済みパズルの一覧、再プレイ、削除に対応
+- 完成時にメダルを1枚獲得
+- メダル数に応じて称号を獲得
+- GitHub Pages公開に対応
+
+## パズルモード
+
+### タイルパズル
+
+四角いピースを入れ替えて完成させるパズルです。PCではドラッグ＆ドロップ、スマホでは2つのピースを順番にタップして入れ替えます。
+
+### ジグソーパズル
+
+ピースを自由に動かして、正しい場所にはめるパズルです。正解位置の近くで離すと自動で吸着し、吸着済みピースは固定されます。全ピースが吸着すると完成です。
+
+ジグソーパズルではピース数が多いとスマホで操作しづらい場合があります。はじめは3×3または4×4がおすすめです。
+
+## メダル・称号
+
+パズルを完成するとメダルを1枚獲得します。メダル数はブラウザの `localStorage` に保存されます。
+
+称号はメダル数に応じて更新されます。
+
+- 0枚: パズルはじめました
+- 3枚: パズル見習い
+- 10枚: しゃしんコレクター
+- 20枚: パズル名人
+- 30枚: パズルマスター
+- 50枚: 伝説のパズル勇者
+
+## 使い方
+
+1. ホーム画面で「写真パズルを追加」を押します。
+2. 「写真を選ぶ」または「カメラで撮る」から画像を読み込みます。
+3. パズル名、ピース数、パズルモードを選んで保存します。
+4. 一覧の「遊ぶ」からパズルを開始します。
+5. 完成するとメダルを1枚獲得できます。
 
 ## 保存データ
 
 - IndexedDB: `photo-puzzle-medal-db`
-- Object Store: `puzzles`, `images`, `progresses`
+- Object Store: `puzzles`, `images`
 - localStorage: `photo-puzzle-medal:app-stats`
 
-`progresses` は一時保存用です。1パズルにつき1件だけ保存し、同じパズルで保存した場合は上書きされます。完成時とパズル削除時には該当する一時保存データを削除します。
+写真データはブラウザ内に保存されます。別端末や別ブラウザには自動同期されません。
 
-DBバージョンアップ時は既存の `puzzles` / `images` store を削除せず、追加storeだけを作成します。
+既存の保存済みパズルに `mode` が無い場合は、自動的に `tile` として扱います。
 
 ## 開発方法
 
@@ -43,47 +73,59 @@ npm.cmd run build
 
 ビルド結果は `dist/` に出力されます。
 
-## GitHub Pages 公開
+## GitHub Pages公開方法
 
-`vite.config.ts` で以下の `base` を設定しています。
+このアプリは `vite.config.ts` で次のように設定しています。
 
 ```ts
 base: "/photo-puzzle-medal/",
 ```
 
-Web版は GitHub Pages で公開する想定です。GitHub Actions を使う場合は、`Settings > Pages` の Source を `GitHub Actions` に設定してから `main` ブランチへ push してください。
+GitHubのリポジトリ名を `photo-puzzle-medal` にする場合は、このまま公開できます。別名にする場合は、`base` を `/<リポジトリ名>/` に変更してください。
 
-## Androidアプリ化メモ
+GitHub Actionsで公開する場合は、以下のようなワークフローを `.github/workflows/deploy.yml` に追加します。
 
-将来的に Capacitor で Android アプリ化する想定です。現時点では Capacitor 自体は導入していません。
+```yml
+name: Deploy to GitHub Pages
 
-想定手順:
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
-```bash
-npm.cmd run build
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
 ```
 
-その後、Capacitor 導入後に Android プロジェクトへ Web ビルド成果物を反映します。
-
-パッケージ名候補:
-
-- おすすめ: `com.altogrow.photopuzzlemedal`
-- 代替: `com.altogrow.shashinPuzzleCollection`
-
-Google Play 公開時に必要な確認:
-
-- 署名キーの作成と管理
-- Play Console 登録
-- 内部テスト、クローズドテスト、製品版リリースの確認
-- ストア掲載情報の作成
-- プライバシーポリシーの確認
-- 写真保存や共有を追加する場合の権限確認
-
-## Capacitor化しやすくするための構成
-
-- 画像保存処理: `src/lib/download.ts`
-- 完成画像生成: `src/lib/completionImage.ts`
-- 端末情報: `src/lib/platform.ts`
-- レスポンシブ判定: `src/hooks/useResponsiveLayout.ts`
-
-将来 `@capacitor/filesystem` や `@capacitor/share` を使う場合は、まず `downloadBlob` の中身を差し替える想定です。
+GitHubの `Settings > Pages` で Source を `GitHub Actions` に設定してから、`main` ブランチへpushしてください。

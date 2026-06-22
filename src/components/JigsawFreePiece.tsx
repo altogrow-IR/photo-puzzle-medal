@@ -7,8 +7,6 @@ type JigsawFreePieceProps = {
   piece: JigsawPieceState;
   gridSize: number;
   imageUrl: string;
-  originX: number;
-  originY: number;
   onDragStart: (pieceId: string) => void;
   onDragMove: (pieceId: string, x: number, y: number) => void;
   onDragEnd: (pieceId: string, pointerType: string) => void;
@@ -18,15 +16,13 @@ export function JigsawFreePiece({
   piece,
   gridSize,
   imageUrl,
-  originX,
-  originY,
   onDragStart,
   onDragMove,
   onDragEnd,
 }: JigsawFreePieceProps) {
   const clipId = useId().replace(/:/g, "");
   const path = createJigsawPath(piece.width, piece.height, piece.shape);
-  const dragHandlers = useJigsawDrag({ piece, originX, originY, onDragStart, onDragMove, onDragEnd });
+  const dragHandlers = useJigsawDrag({ piece, onDragStart, onDragMove, onDragEnd });
   const tabPadding = Math.min(piece.width, piece.height) * 0.22;
 
   return (
@@ -35,7 +31,7 @@ export function JigsawFreePiece({
       style={{
         width: piece.width + tabPadding * 2,
         height: piece.height + tabPadding * 2,
-        transform: `translate3d(${originX + piece.x - tabPadding}px, ${originY + piece.y - tabPadding}px, 0)`,
+        transform: `translate3d(${piece.x - tabPadding}px, ${piece.y - tabPadding}px, 0)`,
         zIndex: piece.zIndex,
       }}
       {...dragHandlers}

@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
 
-export const usePuzzleTimer = (
-  isRunning: boolean,
-  resetKey: string,
-  initialSeconds = 0,
-): number => {
-  const [seconds, setSeconds] = useState(initialSeconds);
+export const usePuzzleTimer = (isRunning: boolean, resetKey: string): number => {
+  const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
-    setSeconds(initialSeconds);
-  }, [initialSeconds, resetKey]);
+    setSeconds(0);
+  }, [resetKey]);
 
   useEffect(() => {
     if (!isRunning) {

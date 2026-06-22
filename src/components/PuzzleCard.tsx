@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { getImage } from "../lib/db";
 import { PUZZLE_MODE_LABELS } from "../lib/puzzleMode";
-import type { PuzzleItem, SavedPuzzleProgress } from "../types/puzzle";
+import type { PuzzleItem } from "../types/puzzle";
 
 type PuzzleCardProps = {
   puzzle: PuzzleItem;
-  progress?: SavedPuzzleProgress;
-  onResume: (puzzle: PuzzleItem) => void;
-  onStartFresh: (puzzle: PuzzleItem) => void;
+  onPlay: (puzzle: PuzzleItem) => void;
   onDelete: (puzzle: PuzzleItem) => void;
 };
 
@@ -24,13 +22,7 @@ const formatDate = (dateText?: string): string => {
   }).format(new Date(dateText));
 };
 
-export function PuzzleCard({
-  puzzle,
-  progress,
-  onResume,
-  onStartFresh,
-  onDelete,
-}: PuzzleCardProps) {
+export function PuzzleCard({ puzzle, onPlay, onDelete }: PuzzleCardProps) {
   const [thumbnailUrl, setThumbnailUrl] = useState<string>("");
   const [error, setError] = useState<string>("");
 
@@ -63,12 +55,7 @@ export function PuzzleCard({
   return (
     <article className="puzzle-card">
       <div className="thumbnail-frame">
-        {thumbnailUrl ? (
-          <img src={thumbnailUrl} alt={`${puzzle.title}のサムネイル`} />
-        ) : (
-          <span>{error || "読み込み中"}</span>
-        )}
-        {progress && <span className="progress-badge">途中保存あり</span>}
+        {thumbnailUrl ? <img src={thumbnailUrl} alt={`${puzzle.title}のサムネイル`} /> : <span>{error || "読み込み中"}</span>}
       </div>
       <div className="puzzle-card-body">
         <h3>{puzzle.title}</h3>
@@ -91,22 +78,11 @@ export function PuzzleCard({
             <dt>最後</dt>
             <dd>{formatDate(puzzle.lastPlayedAt)}</dd>
           </div>
-          {progress && (
-            <div>
-              <dt>保存日時</dt>
-              <dd>{formatDate(progress.savedAt)}</dd>
-            </div>
-          )}
         </dl>
       </div>
       <div className="card-actions">
-        {progress && (
-          <button className="primary-button" type="button" onClick={() => onResume(puzzle)}>
-            つづきから
-          </button>
-        )}
-        <button className={progress ? "secondary-button" : "primary-button"} type="button" onClick={() => onStartFresh(puzzle)}>
-          最初から
+        <button className="primary-button" type="button" onClick={() => onPlay(puzzle)}>
+          遊ぶ
         </button>
         <button className="danger-button" type="button" onClick={() => onDelete(puzzle)}>
           削除

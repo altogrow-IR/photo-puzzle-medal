@@ -23,7 +23,6 @@
 body {
   min-width: 320px;
   min-height: 100vh;
-  min-height: 100dvh;
   margin: 0;
   background:
     radial-gradient(circle at top left, rgba(255, 207, 74, 0.32), transparent 32rem),
@@ -241,7 +240,6 @@ button:disabled {
 }
 
 .thumbnail-frame {
-  position: relative;
   display: grid;
   place-items: center;
   aspect-ratio: 1;
@@ -249,18 +247,6 @@ button:disabled {
   border-radius: 8px;
   background: #f3ead5;
   color: var(--ink-soft);
-}
-
-.progress-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: rgba(45, 123, 98, 0.94);
-  color: #ffffff;
-  font-size: 0.84rem;
-  font-weight: 900;
 }
 
 .thumbnail-frame img,
@@ -320,8 +306,7 @@ dd {
 .success-message,
 .error-message,
 .empty-text,
-.hint-message,
-.resume-summary {
+.hint-message {
   padding: 12px 14px;
   border-radius: 8px;
   font-weight: 700;
@@ -345,11 +330,6 @@ dd {
 .hint-message {
   background: #eef8ff;
   color: #27546e;
-}
-
-.resume-summary {
-  background: #f0ecff;
-  color: #5a3ca0;
 }
 
 .how-to {
@@ -547,38 +527,21 @@ dd {
   font-weight: 800;
 }
 
-.jigsaw-play-layout {
-  position: relative;
+.jigsaw-layout {
   display: grid;
-  gap: 10px;
-  overflow: hidden;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 16px;
+  align-items: start;
 }
 
-.jigsaw-status-messages {
-  display: grid;
-  gap: 6px;
-}
-
-.jigsaw-status-messages:empty {
-  display: none;
-}
-
-.jigsaw-mobile-info-bar {
-  display: none;
-}
-
-.jigsaw-board-panel,
-.jigsaw-side-panel {
+.jigsaw-main {
   min-width: 0;
-  min-height: 0;
 }
 
-.jigsaw-board-panel {
+.jigsaw-stage {
   position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  min-height: 620px;
   overflow: hidden;
   border: 3px solid #5d3515;
   border-radius: 8px;
@@ -587,44 +550,15 @@ dd {
     linear-gradient(rgba(93, 53, 21, 0.08) 1px, transparent 1px),
     #fffdf7;
   background-size: 28px 28px;
-}
-
-.jigsaw-side-panel {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  gap: 10px;
-  align-content: start;
-  overflow: hidden;
-}
-
-.jigsaw-controls {
-  position: relative;
-  z-index: 6;
-  justify-content: stretch;
-}
-
-.jigsaw-controls > * {
-  flex: 1 1 0;
-}
-
-.jigsaw-piece-tray {
-  position: relative;
-  z-index: 2;
-  min-width: 0;
-  min-height: 0;
-  overflow: auto;
-  border: 2px dashed rgba(45, 123, 98, 0.24);
-  border-radius: 8px;
-  background: rgba(255, 250, 240, 0.72);
-  -webkit-overflow-scrolling: touch;
+  touch-action: none;
 }
 
 .jigsaw-target-board {
-  position: relative;
+  position: absolute;
+  inset: 0 auto auto 0;
   overflow: hidden;
-  border: 2px dashed rgba(45, 123, 98, 0.35);
-  border-radius: 8px;
+  border-right: 2px dashed rgba(45, 123, 98, 0.35);
+  border-bottom: 2px dashed rgba(45, 123, 98, 0.35);
   background: #f8f0dc;
 }
 
@@ -637,24 +571,14 @@ dd {
 }
 
 .jigsaw-tray-label {
-  position: sticky;
-  top: 6px;
-  left: 6px;
-  z-index: 1;
-  width: max-content;
+  position: absolute;
+  left: 12px;
   min-height: 28px;
   padding: 4px 10px;
   border-radius: 8px;
   background: #5d3515;
   color: #fff8e8;
   font-weight: 900;
-}
-
-.jigsaw-piece-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
 }
 
 .jigsaw-piece {
@@ -669,7 +593,6 @@ dd {
   user-select: none;
   touch-action: none;
   will-change: transform;
-  pointer-events: auto;
 }
 
 .jigsaw-piece:active {
@@ -687,42 +610,6 @@ dd {
   fill: transparent;
   stroke: rgba(255, 255, 255, 0.85);
   stroke-width: 2.4;
-}
-
-.jigsaw-title-compact,
-.jigsaw-back-compact {
-  display: none;
-}
-
-.reference-button {
-  min-height: 34px;
-  padding: 5px 10px;
-}
-
-.reference-dialog {
-  display: grid;
-  gap: 14px;
-  width: min(520px, 100%);
-  max-height: calc(100dvh - 32px);
-  padding: 18px;
-  overflow: auto;
-  border: 3px solid var(--gold);
-  border-radius: 8px;
-  background: #fffaf0;
-  box-shadow: var(--shadow);
-}
-
-.reference-dialog h2 {
-  margin: 0;
-  color: #5d3515;
-}
-
-.reference-dialog img {
-  width: 100%;
-  max-height: 68dvh;
-  object-fit: contain;
-  border-radius: 8px;
-  background: #f3ead5;
 }
 
 .title-message {
@@ -772,46 +659,6 @@ dd {
   background: #fffaf0;
   box-shadow: var(--shadow);
   text-align: center;
-}
-
-.choice-dialog {
-  width: min(460px, 100%);
-  padding: 22px;
-  border: 3px solid var(--gold);
-  border-radius: 8px;
-  background: #fffaf0;
-  box-shadow: var(--shadow);
-}
-
-.choice-dialog h2 {
-  margin: 0 0 16px;
-  color: #5d3515;
-  font-size: 1.4rem;
-}
-
-.completion-modal-grid {
-  display: grid;
-  gap: 16px;
-}
-
-.completion-image-preview {
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  aspect-ratio: 1;
-  border: 2px solid rgba(199, 122, 22, 0.35);
-  border-radius: 8px;
-  background: #f3ead5;
-}
-
-.completion-image-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.completion-details {
-  min-width: 0;
 }
 
 .completion-modal h2 {
@@ -904,386 +751,5 @@ dd {
 
   .jigsaw-stage {
     min-height: 560px;
-  }
-}
-
-@media (min-width: 768px) {
-  .app-shell {
-    width: min(1180px, calc(100% - 32px));
-  }
-
-  .puzzle-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .add-screen {
-    max-width: 1040px;
-  }
-
-  .completion-modal {
-    width: min(900px, calc(100% - 40px));
-    max-height: calc(100dvh - 32px);
-    overflow: auto;
-  }
-
-  .completion-modal-grid {
-    grid-template-columns: minmax(280px, 1fr) minmax(300px, 0.9fr);
-    align-items: center;
-  }
-}
-
-@media (min-width: 768px) and (orientation: landscape) {
-  .puzzle-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .add-form {
-    grid-template-columns: minmax(320px, 1fr) minmax(300px, 420px);
-    align-items: start;
-  }
-
-  .add-form > .file-actions,
-  .add-form > .preview-box {
-    grid-column: 1;
-  }
-
-  .add-form > .field,
-  .add-form > .piece-options,
-  .add-form > .error-message,
-  .add-form > .form-actions {
-    grid-column: 2;
-  }
-
-  .preview-box {
-    min-height: 420px;
-  }
-
-  .play-screen {
-    min-height: 100dvh;
-  }
-
-  .jigsaw-screen {
-    max-height: calc(100dvh - 48px);
-    overflow: hidden;
-  }
-
-  .jigsaw-play-layout {
-    grid-template-columns: minmax(520px, 1fr) minmax(280px, 360px);
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    min-height: calc(100dvh - 88px);
-    max-height: calc(100dvh - 88px);
-    overflow: hidden;
-  }
-
-  .jigsaw-header {
-    grid-column: 1 / -1;
-    margin-bottom: 0;
-  }
-
-  .jigsaw-board-area {
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .jigsaw-side-panel {
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .jigsaw-side-panel .sample-panel img {
-    max-height: 30dvh;
-  }
-
-  .jigsaw-stage {
-    min-height: 0;
-    max-height: calc(100dvh - 220px);
-    overflow: auto;
-  }
-
-  .jigsaw-controls {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (min-width: 768px) and (orientation: portrait) {
-  .jigsaw-play-layout {
-    min-height: 100dvh;
-  }
-
-  .jigsaw-board-area {
-    display: grid;
-    justify-content: center;
-  }
-
-  .jigsaw-stage {
-    min-height: 0;
-    max-height: 64dvh;
-    overflow: auto;
-  }
-
-  .jigsaw-side-panel {
-    grid-template-columns: minmax(180px, 260px) 1fr;
-    align-items: start;
-  }
-
-  .jigsaw-stats {
-    margin-bottom: 0;
-  }
-}
-
-body:has(.jigsaw-screen) {
-  overflow: hidden;
-}
-
-.app-shell:has(.jigsaw-screen) {
-  width: 100%;
-  padding: 0;
-}
-
-.jigsaw-screen {
-  height: 100dvh;
-  max-height: 100dvh;
-  padding: 10px;
-  overflow: hidden;
-  border-radius: 0;
-}
-
-@media (min-width: 768px) and (orientation: landscape) {
-  .jigsaw-play-layout {
-    grid-template-columns: minmax(0, 1fr) clamp(260px, 26vw, 360px);
-    grid-template-rows: auto auto auto minmax(0, 1fr) auto;
-    height: calc(100dvh - 20px);
-    max-height: calc(100dvh - 20px);
-    gap: 10px;
-  }
-
-  .jigsaw-header {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    margin-bottom: 0;
-  }
-
-  .jigsaw-status-messages {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-
-  .jigsaw-status-messages .success-message,
-  .jigsaw-status-messages .error-message,
-  .jigsaw-status-messages .hint-message {
-    margin: 0;
-    padding: 8px 10px;
-  }
-
-  .jigsaw-board-panel {
-    grid-column: 1;
-    grid-row: 3 / 6;
-  }
-
-  .jigsaw-side-panel {
-    grid-column: 2;
-    grid-row: 3;
-  }
-
-  .jigsaw-piece-tray {
-    grid-column: 2;
-    grid-row: 4;
-  }
-
-  .jigsaw-controls {
-    grid-column: 2;
-    grid-row: 5;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .jigsaw-side-panel .sample-panel {
-    gap: 8px;
-    padding: 10px;
-  }
-
-  .jigsaw-side-panel .reference-image {
-    width: 100%;
-    height: auto;
-    max-height: 24dvh;
-    object-fit: contain;
-  }
-
-  .jigsaw-stats {
-    display: grid;
-    gap: 8px;
-    margin-bottom: 0;
-  }
-
-  .jigsaw-stats span,
-  .jigsaw-controls button {
-    min-height: 42px;
-    padding: 8px 10px;
-  }
-}
-
-@media (min-width: 768px) and (orientation: portrait) {
-  .jigsaw-screen {
-    padding: 10px;
-  }
-
-  .jigsaw-play-layout {
-    grid-template-rows: auto auto auto minmax(0, 1fr) minmax(96px, 22dvh) auto;
-    height: calc(100dvh - 20px);
-    max-height: calc(100dvh - 20px);
-    gap: 10px;
-  }
-
-  .jigsaw-header {
-    margin-bottom: 0;
-  }
-
-  .jigsaw-status-messages .success-message,
-  .jigsaw-status-messages .error-message,
-  .jigsaw-status-messages .hint-message {
-    margin: 0;
-    padding: 8px 10px;
-  }
-
-  .jigsaw-mobile-info-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    overflow-x: auto;
-    white-space: nowrap;
-    font-size: 0.92rem;
-    font-weight: 900;
-  }
-
-  .jigsaw-side-panel {
-    display: none;
-  }
-
-  .jigsaw-board-panel {
-    min-height: 0;
-  }
-
-  .jigsaw-piece-tray {
-    display: flex;
-    overflow-x: auto;
-    overflow-y: hidden;
-    max-height: 22dvh;
-  }
-
-  .jigsaw-controls {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .jigsaw-controls button {
-    min-height: 44px;
-    padding: 8px;
-  }
-}
-
-@media (max-width: 767px) {
-  .jigsaw-screen {
-    padding: 8px;
-  }
-
-  .jigsaw-play-layout {
-    grid-template-rows: auto auto auto minmax(0, 1fr) minmax(78px, 18dvh) auto;
-    height: calc(100dvh - 16px);
-    max-height: calc(100dvh - 16px);
-    gap: 6px;
-  }
-
-  .jigsaw-header {
-    min-height: 0;
-    margin-bottom: 0;
-  }
-
-  .jigsaw-header .eyebrow,
-  .jigsaw-title-full {
-    display: none;
-  }
-
-  .jigsaw-title-compact {
-    display: inline;
-  }
-
-  .jigsaw-header h2 {
-    font-size: 1.05rem;
-    line-height: 1.1;
-  }
-
-  .jigsaw-status-messages .success-message,
-  .jigsaw-status-messages .error-message,
-  .jigsaw-status-messages .hint-message {
-    margin: 0;
-    padding: 6px 8px;
-    font-size: 0.82rem;
-  }
-
-  .jigsaw-mobile-info-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-    overflow-x: auto;
-    white-space: nowrap;
-    font-size: 0.85rem;
-    font-weight: 900;
-  }
-
-  .jigsaw-side-panel {
-    display: none;
-  }
-
-  .jigsaw-board-panel {
-    min-height: 0;
-    border-width: 2px;
-  }
-
-  .jigsaw-target-board {
-    border-width: 2px;
-  }
-
-  .jigsaw-piece-tray {
-    display: flex;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 6px 2px;
-    max-height: 18dvh;
-  }
-
-  .jigsaw-tray-label {
-    min-height: 24px;
-    padding: 3px 8px;
-    font-size: 0.78rem;
-  }
-
-  .jigsaw-controls {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
-  }
-
-  .jigsaw-controls button {
-    min-height: 42px;
-    padding: 8px 6px;
-    font-size: 0.85rem;
-  }
-
-  .jigsaw-back-full {
-    display: none;
-  }
-
-  .jigsaw-back-compact {
-    display: inline;
-  }
-
-  .reference-button {
-    min-height: 32px;
-    padding: 4px 9px;
-    font-size: 0.82rem;
   }
 }
