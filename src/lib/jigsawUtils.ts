@@ -3,6 +3,14 @@ import type { JigsawEdge, JigsawPieceShape, JigsawPieceState } from "../types/pu
 export const SNAP_THRESHOLD_DESKTOP = 24;
 export const SNAP_THRESHOLD_TOUCH = 36;
 
+export type JigsawTrayArea = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  flow: "grid" | "compact";
+};
+
 const oppositeEdge = (edge: JigsawEdge): JigsawEdge => {
   if (edge === "tab") {
     return "blank";
@@ -18,9 +26,6 @@ export const getDistance = (x1: number, y1: number, x2: number, y2: number): num
   const dy = y1 - y2;
   return Math.sqrt(dx * dx + dy * dy);
 };
-
-const clamp = (value: number, min: number, max: number): number =>
-  Math.min(Math.max(value, min), max);
 
 const shuffleNumbers = (count: number): number[] => {
   const values = Array.from({ length: count }, (_, index) => index);
@@ -98,47 +103,117 @@ export const createJigsawPath = (
   return `M 0 0 ${topCurve} ${rightCurve} ${bottomCurve} ${leftCurve} Z`;
 };
 
-export const createJigsawPieces = (
-  gridSize: number,
-  boardSize: number,
-  trayTop: number,
-): JigsawPieceState[] => {
-  const pieceSize = boardSize / gridSize;
-  const shapes = createJigsawShapes(gridSize);
-  const trayColumns = Math.max(3, Math.min(gridSize, 4));
-  const trayRows = Math.ceil(shapes.length / trayColumns);
-  const shuffledSlots = shuffleNumbers(shapes.length);
-  const xStep = trayColumns > 1 ? (boardSize - pieceSize) / (trayColumns - 1) : 0;
-  const yStep = pieceSize + 18;
-  const jitterRangeX = Math.max(10, pieceSize * 0.3);
-  const jitterRangeY = Math.max(8, pieceSize * 0.22);
+const getTraySlotPosition = (
+  slotIndex: number,
+  pieceCount: number,
+  pieceWidth: number,
+  pieceHeight: number,
+  trayArea: JigsawTrayArea,
+) => {
+  const gap = 10;
+  const safeWidth = Math.max(pieceWidth, trayArea.width);
+  const safeHeight = Math.max(pieceHeight, trayArea.height);
+  const prefersGrid = trayArea.flow === "grid";
+  const rowCount = prefersGrid
+    ? Math.max(1, Math.floor((safeHeight + gap) / (pieceHeight + gap)))
+    : pieceCount > 16 && safeHeight >= pieceHeight * 1.8
+      ? 2
+      : 1;
+  const columnCount = Math.max(1, Math.ceil(pieceCount / rowCount));
+  const col = slotIndex % columnCount;
+  const row = Math.floor(slotIndex / columnCount);
+  const xStep =
+    columnCount > 1
+      ? Math.min(pieceWidth + gap, Math.max(0, (safeWidth - pieceWidth) / (columnCount - 1)))
+      : 0;
+  const yStep =
+    rowCount > 1
+      ? Math.min(pieceHeight + gap, Math.max(0, (safeHeight - pieceHeight) / (rowCount - 1)))
+      : 0;
 
-  return shapes.map((shape, index) => {
-    const row = Math.floor(index / gridSize);
-    const col = index % gridSize;
+  return {
+    x: trayArea.x + col * xStep,
+    y: trayArea.y + row * yStep,
+  };
+};
+
+export const arrangeJigsawPiecesInTray = (
+  pieces: JigsawPieceState[],
+  gridSize: number,
+  boardWidth: number,
+  boardHeight: number,
+  trayArea: JigsawTrayArea,
+): JigsawPieceState[] => {
+  const pieceWidth = boardWidth / gridSize;
+  const pieceHeight = boardHeight / gridSize;
+  const shuffledSlots = shuffleNumbers(pieces.length);
+  const jitterRangeX = Math.max(4, pieceWidth * 0.12);
+  const jitterRangeY = Math.max(4, pieceHeight * 0.12);
+
+  return pieces.map((piece, index) => {
     const slotIndex = shuffledSlots[index];
-    const trayCol = slotIndex % trayColumns;
-    const trayRow = Math.floor(slotIndex / trayColumns);
-    const baseX = trayCol * xStep;
-    const baseY = trayTop + trayRow * yStep;
+    const slot = getTraySlotPosition(slotIndex, pieces.length, pieceWidth, pieceHeight, trayArea);
     const jitterX = (Math.random() - 0.5) * jitterRangeX;
     const jitterY = (Math.random() - 0.5) * jitterRangeY;
-    const maxY = trayTop + Math.max(0, trayRows - 1) * yStep + pieceSize * 0.18;
+
+    if (piece.isSnapped) {
+      return {
+        ...piece,
+        targetX: piece.col * pieceWidth,
+        targetY: piece.row * pieceHeight,
+        x: piece.col * pieceWidth,
+        y: piece.row * pieceHeight,
+        width: pieceWidth,
+        height: pieceHeight,
+      };
+    }
 
     return {
-      id: `jigsaw-${index}`,
-      correctIndex: index,
-      row,
-      col,
-      x: clamp(baseX + jitterX, 0, Math.max(0, boardSize - pieceSize)),
-      y: clamp(baseY + jitterY, trayTop, maxY),
-      targetX: col * pieceSize,
-      targetY: row * pieceSize,
-      width: pieceSize,
-      height: pieceSize,
-      isSnapped: false,
-      zIndex: index + 1,
-      shape,
+      ...piece,
+      x: slot.x + jitterX,
+      y: slot.y + jitterY,
+      targetX: piece.col * pieceWidth,
+      targetY: piece.row * pieceHeight,
+      width: pieceWidth,
+      height: pieceHeight,
     };
   });
+};
+
+export const createJigsawPieces = (
+  gridSize: number,
+  boardWidth: number,
+  boardHeight: number,
+  trayArea: JigsawTrayArea,
+): JigsawPieceState[] => {
+  const pieceWidth = boardWidth / gridSize;
+  const pieceHeight = boardHeight / gridSize;
+  const shapes = createJigsawShapes(gridSize);
+
+  return arrangeJigsawPiecesInTray(
+    shapes.map((shape, index) => {
+      const row = Math.floor(index / gridSize);
+      const col = index % gridSize;
+
+      return {
+        id: `jigsaw-${index}`,
+        correctIndex: index,
+        row,
+        col,
+        x: 0,
+        y: 0,
+        targetX: col * pieceWidth,
+        targetY: row * pieceHeight,
+        width: pieceWidth,
+        height: pieceHeight,
+        isSnapped: false,
+        zIndex: index + 1,
+        shape,
+      };
+    }),
+    gridSize,
+    boardWidth,
+    boardHeight,
+    trayArea,
+  );
 };

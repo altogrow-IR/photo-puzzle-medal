@@ -1,9 +1,10 @@
-import type { PuzzleItem, StoredImage } from "../types/puzzle";
+import type { PuzzleItem, SavedPuzzleProgress, StoredImage } from "../types/puzzle";
 
 const DB_NAME = "photo-puzzle-medal-db";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const PUZZLE_STORE = "puzzles";
 const IMAGE_STORE = "images";
+const PROGRESS_STORE = "progresses";
 
 export const normalizePuzzleItem = (puzzle: Partial<PuzzleItem>): PuzzleItem => {
   const gridSize = puzzle.gridSize ?? 3;
@@ -46,6 +47,11 @@ export const openPuzzleDb = (): Promise<IDBDatabase> => {
 
       if (!db.objectStoreNames.contains(IMAGE_STORE)) {
         db.createObjectStore(IMAGE_STORE, { keyPath: "id" });
+      }
+
+      if (!db.objectStoreNames.contains(PROGRESS_STORE)) {
+        const progressStore = db.createObjectStore(PROGRESS_STORE, { keyPath: "puzzleId" });
+        progressStore.createIndex("savedAt", "savedAt", { unique: false });
       }
     };
 
@@ -95,11 +101,12 @@ export const updatePuzzle = savePuzzle;
 export const deletePuzzleAndImages = async (puzzle: PuzzleItem): Promise<void> => {
   const db = await openPuzzleDb();
   try {
-    const tx = db.transaction([PUZZLE_STORE, IMAGE_STORE], "readwrite");
+    const tx = db.transaction([PUZZLE_STORE, IMAGE_STORE, PROGRESS_STORE], "readwrite");
     tx.objectStore(PUZZLE_STORE).delete(puzzle.id);
     const imageStore = tx.objectStore(IMAGE_STORE);
     imageStore.delete(puzzle.imageId);
     imageStore.delete(puzzle.thumbnailId);
+    tx.objectStore(PROGRESS_STORE).delete(puzzle.id);
     await transactionDone(tx);
   } finally {
     db.close();
@@ -133,6 +140,54 @@ export const deleteImage = async (id: string): Promise<void> => {
     const tx = db.transaction(IMAGE_STORE, "readwrite");
     tx.objectStore(IMAGE_STORE).delete(id);
     await transactionDone(tx);
+  } finally {
+    db.close();
+  }
+};
+
+export const savePuzzleProgress = async (progress: SavedPuzzleProgress): Promise<void> => {
+  const db = await openPuzzleDb();
+  try {
+    const tx = db.transaction(PROGRESS_STORE, "readwrite");
+    tx.objectStore(PROGRESS_STORE).put(progress);
+    await transactionDone(tx);
+  } finally {
+    db.close();
+  }
+};
+
+export const getPuzzleProgress = async (
+  puzzleId: string,
+): Promise<SavedPuzzleProgress | undefined> => {
+  const db = await openPuzzleDb();
+  try {
+    const tx = db.transaction(PROGRESS_STORE, "readonly");
+    return await requestToPromise<SavedPuzzleProgress | undefined>(
+      tx.objectStore(PROGRESS_STORE).get(puzzleId),
+    );
+  } finally {
+    db.close();
+  }
+};
+
+export const deletePuzzleProgress = async (puzzleId: string): Promise<void> => {
+  const db = await openPuzzleDb();
+  try {
+    const tx = db.transaction(PROGRESS_STORE, "readwrite");
+    tx.objectStore(PROGRESS_STORE).delete(puzzleId);
+    await transactionDone(tx);
+  } finally {
+    db.close();
+  }
+};
+
+export const getAllPuzzleProgresses = async (): Promise<SavedPuzzleProgress[]> => {
+  const db = await openPuzzleDb();
+  try {
+    const tx = db.transaction(PROGRESS_STORE, "readonly");
+    return await requestToPromise<SavedPuzzleProgress[]>(
+      tx.objectStore(PROGRESS_STORE).getAll(),
+    );
   } finally {
     db.close();
   }

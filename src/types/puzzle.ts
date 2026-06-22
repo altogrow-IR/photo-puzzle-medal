@@ -72,3 +72,19 @@ export type CompletionResult = {
   currentTitle: MedalTitle;
   gainedTitle?: MedalTitle;
 };
+
+export type PuzzleProgressStatus = "playing" | "completed";
+
+export type SavedPuzzleProgress = {
+  id: string;
+  puzzleId: string;
+  mode: PuzzleMode;
+  status: PuzzleProgressStatus;
+  savedAt: string;
+  elapsedSeconds: number;
+  moveCount: number;
+  tilePieces?: PuzzlePiece[];
+  jigsawPieces?: JigsawPieceState[];
+  boardWidth?: number;
+  boardHeight?: number;
+};

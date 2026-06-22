@@ -6,6 +6,9 @@ export const createId = (): string => {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
 
+export const IMAGE_MAX_SIZE = 1600;
+export const THUMBNAIL_MAX_SIZE = 400;
+
 const loadImage = (source: Blob): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const url = URL.createObjectURL(source);
