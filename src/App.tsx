@@ -4,6 +4,7 @@ import { JigsawFreePlayBoard } from "./components/JigsawFreePlayBoard";
 import { MedalDisplay } from "./components/MedalDisplay";
 import { PuzzleBoard } from "./components/PuzzleBoard";
 import { PuzzleCard } from "./components/PuzzleCard";
+import { clearProgress } from "./lib/progress";
 import { useAppStats } from "./hooks/useAppStats";
 import { deletePuzzleAndImages, getPuzzles, updatePuzzle } from "./lib/db";
 import { getCurrentMedalTitle } from "./lib/medalTitles";
@@ -52,6 +53,7 @@ function App() {
     setError("");
     try {
       await deletePuzzleAndImages(puzzle);
+      clearProgress(puzzle.id);
       setMessage("パズルを削除しました。");
       await loadPuzzles();
     } catch (caughtError) {
@@ -96,9 +98,9 @@ function App() {
     <>
       <section className="hero">
         <div>
-          <span className="eyebrow">ブラウザだけで遊べる</span>
+
           <h1>しゃしんパズルコレクション</h1>
-          <p>その場で撮った写真や端末内の画像を、タイルパズルやジグソーパズルに変えて保存できます。</p>
+
         </div>
         <MedalDisplay totalMedals={stats.totalMedals} />
       </section>
@@ -134,7 +136,7 @@ function App() {
         </div>
       </section>
 
-      <section className="how-to">
+      <details className="how-to"><summary>遊び方を見る</summary>
         <div className="section-heading">
           <span className="eyebrow">遊び方</span>
           <h2>写真を選んで、モードを選んで、完成！</h2>
@@ -145,7 +147,7 @@ function App() {
           <li>タイルは入れ替え、ジグソーは自由に動かして正しい場所へはめます。</li>
           <li>完成したらメダルを1枚ゲットし、称号にも近づきます。</li>
         </ol>
-      </section>
+      </details>
     </>
   );
 

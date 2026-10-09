@@ -2,6 +2,7 @@ import { PointerEvent, useRef } from "react";
 import type { JigsawPieceState } from "../types/puzzle";
 
 type UseJigsawDragParams = {
+  scale?: number;
   piece: JigsawPieceState;
   onDragStart: (pieceId: string) => void;
   onDragMove: (pieceId: string, x: number, y: number) => void;
@@ -10,6 +11,7 @@ type UseJigsawDragParams = {
 
 export const useJigsawDrag = ({
   piece,
+  scale = 1,
   onDragStart,
   onDragMove,
   onDragEnd,
@@ -25,8 +27,8 @@ export const useJigsawDrag = ({
     event.currentTarget.setPointerCapture(event.pointerId);
     draggingRef.current = true;
     offsetRef.current = {
-      x: event.clientX - piece.x,
-      y: event.clientY - piece.y,
+      x: event.clientX / scale - piece.x,
+      y: event.clientY / scale - piece.y,
     };
     onDragStart(piece.id);
   };
@@ -36,7 +38,7 @@ export const useJigsawDrag = ({
       return;
     }
 
-    onDragMove(piece.id, event.clientX - offsetRef.current.x, event.clientY - offsetRef.current.y);
+    onDragMove(piece.id, event.clientX / scale - offsetRef.current.x, event.clientY / scale - offsetRef.current.y);
   };
 
   const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {

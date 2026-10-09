@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { loadProgress, saveProgress, clearProgress } from "../lib/progress";
+import { resizeImageToBlob } from "../lib/imageUtils";
 import { getImage } from "../lib/db";
 import { createPuzzlePieces, isPuzzleSolved, shufflePieces, swapPieces } from "../lib/puzzleUtils";
 import { usePuzzleTimer } from "../hooks/usePuzzleTimer";
@@ -20,24 +22,26 @@ const formatSeconds = (seconds: number): string => {
 };
 
 export function PuzzleBoard({ puzzle, totalMedals, onComplete, onBackHome }: PuzzleBoardProps) {
+  const [saved, setSaved] = useState(() => loadProgress(puzzle));
+  const [saveFailed, setSaveFailed] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
-  const [pieces, setPieces] = useState<PuzzlePiece[]>(() => shufflePieces(createPuzzlePieces(puzzle.gridSize)));
+  const [pieces, setPieces] = useState<PuzzlePiece[]>(() => (saved?.pieces as PuzzlePiece[] | undefined) ?? shufflePieces(createPuzzlePieces(puzzle.gridSize)));
   const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
   const [draggedPieceId, setDraggedPieceId] = useState<string | null>(null);
-  const [moves, setMoves] = useState(0);
+  const [moves, setMoves] = useState(saved?.moves ?? 0);
   const [playKey, setPlayKey] = useState(() => `${puzzle.id}-${Date.now()}`);
   const [hasCompletedCurrentPlay, setHasCompletedCurrentPlay] = useState(false);
   const [completionResult, setCompletionResult] = useState<CompletionResult | undefined>();
   const [error, setError] = useState("");
 
-  const elapsedSeconds = usePuzzleTimer(!hasCompletedCurrentPlay && Boolean(imageUrl), playKey);
+  const elapsedSeconds = usePuzzleTimer(!hasCompletedCurrentPlay && Boolean(imageUrl), playKey, saved?.seconds ?? 0);
 
   useEffect(() => {
     let isMounted = true;
     let objectUrl = "";
 
     getImage(puzzle.imageId)
-      .then((image) => {
+      .then(async (image) => {
         if (!isMounted) {
           return;
         }
@@ -45,7 +49,9 @@ export function PuzzleBoard({ puzzle, totalMedals, onComplete, onBackHome }: Puz
           setError("写真データが見つかりません。");
           return;
         }
-        objectUrl = URL.createObjectURL(image.blob);
+        const blob = await resizeImageToBlob(image.blob, 1200);
+        if (!isMounted) return;
+        objectUrl = URL.createObjectURL(blob);
         setImageUrl(objectUrl);
       })
       .catch((caughtError) => {
@@ -62,12 +68,17 @@ export function PuzzleBoard({ puzzle, totalMedals, onComplete, onBackHome }: Puz
     };
   }, [puzzle.imageId]);
 
-  const orderedPieces = useMemo(
+  useEffect(() => {
+ if (!hasCompletedCurrentPlay) setSaveFailed(!saveProgress(puzzle, pieces, elapsedSeconds, moves));
+ }, [puzzle, pieces, elapsedSeconds, moves, hasCompletedCurrentPlay]);
+ const orderedPieces = useMemo(
     () => [...pieces].sort((a, b) => a.currentIndex - b.currentIndex),
     [pieces],
   );
 
   const resetPlay = useCallback(() => {
+    clearProgress(puzzle.id);
+    setSaved(undefined);
     setPieces(shufflePieces(createPuzzlePieces(puzzle.gridSize)));
     setMoves(0);
     setSelectedPieceId(null);
@@ -111,6 +122,7 @@ export function PuzzleBoard({ puzzle, totalMedals, onComplete, onBackHome }: Puz
       return;
     }
 
+    clearProgress(puzzle.id);
     setHasCompletedCurrentPlay(true);
     onComplete(puzzle)
       .then(setCompletionResult)
@@ -144,6 +156,8 @@ export function PuzzleBoard({ puzzle, totalMedals, onComplete, onBackHome }: Puz
             <span>メダル {totalMedals}枚</span>
           </div>
 
+          {saveFailed && <p className="error-message">途中保存できません。この画面を閉じると進捗が失われます。</p>}
+          <p className="operation-hint">ピースを2つタップして入れ替えます。</p>
           {error && <p className="error-message">{error}</p>}
 
           <div

@@ -98,6 +98,23 @@ export const createJigsawPath = (
   return `M 0 0 ${topCurve} ${rightCurve} ${bottomCurve} ${leftCurve} Z`;
 };
 
+// The tray renders array order, independently of the board coordinates.
+export const shuffleJigsawTray = (pieces: JigsawPieceState[]): JigsawPieceState[] => {
+  const shuffled = [...pieces];
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  if (shuffled.length > 1 && shuffled.every((piece, index) => piece.correctIndex === index)) {
+    [shuffled[0], shuffled[1]] = [shuffled[1], shuffled[0]];
+  }
+  return shuffled;
+};
+
+// Old saves used answer order. Only migrate that order; keep all piece states.
+export const restoreJigsawTray = (pieces: JigsawPieceState[]): JigsawPieceState[] =>
+  pieces.every((piece, index) => piece.correctIndex === index) ? shuffleJigsawTray(pieces) : pieces;
+
 export const createJigsawPieces = (
   gridSize: number,
   boardSize: number,
@@ -113,7 +130,7 @@ export const createJigsawPieces = (
   const jitterRangeX = Math.max(10, pieceSize * 0.3);
   const jitterRangeY = Math.max(8, pieceSize * 0.22);
 
-  return shapes.map((shape, index) => {
+  return shuffleJigsawTray(shapes.map((shape, index) => {
     const row = Math.floor(index / gridSize);
     const col = index % gridSize;
     const slotIndex = shuffledSlots[index];
@@ -140,5 +157,5 @@ export const createJigsawPieces = (
       zIndex: index + 1,
       shape,
     };
-  });
+  }));
 };

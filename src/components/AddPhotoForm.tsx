@@ -15,6 +15,7 @@ export function AddPhotoForm({ onSaved, onCancel }: AddPhotoFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [title, setTitle] = useState("");
+  const [crop, setCrop] = useState({ x:50, y:50 });
   const [gridSize, setGridSize] = useState(4);
   const [mode, setMode] = useState<PuzzleMode>("tile");
   const [isSaving, setIsSaving] = useState(false);
@@ -47,6 +48,7 @@ export function AddPhotoForm({ onSaved, onCancel }: AddPhotoFormProps) {
     }
 
     setSelectedFile(file);
+    setCrop({x:50,y:50});
     if (!title.trim()) {
       setTitle(file.name.replace(/\.[^/.]+$/, ""));
     }
@@ -70,8 +72,8 @@ export function AddPhotoForm({ onSaved, onCancel }: AddPhotoFormProps) {
     setIsSaving(true);
     try {
       const now = new Date().toISOString();
-      const imageBlob = await resizeImageToBlob(selectedFile, 1200);
-      const thumbnailBlob = await resizeImageToBlob(selectedFile, 300);
+      const imageBlob = await resizeImageToBlob(selectedFile, 1200, "image/jpeg", .88, crop);
+      const thumbnailBlob = await resizeImageToBlob(selectedFile, 300, "image/jpeg", .88, crop);
       const imageId = createId();
       const thumbnailId = createId();
 
@@ -133,9 +135,10 @@ export function AddPhotoForm({ onSaved, onCancel }: AddPhotoFormProps) {
         </div>
 
         <div className="preview-box">
-          {previewUrl ? <img src={previewUrl} alt="選択した写真のプレビュー" /> : <p>写真を選ぶとここにプレビューが表示されます。</p>}
+          {previewUrl ? <img style={{objectPosition:`${crop.x}% ${crop.y}%`}} src={previewUrl} alt="選択した写真のプレビュー" /> : <p>写真を選ぶとここにプレビューが表示されます。</p>}
         </div>
 
+        {previewUrl && <fieldset className="crop-controls"><legend>写真の切り抜き位置</legend><label>左右<input type="range" min="0" max="100" value={crop.x} onChange={e=>setCrop(c=>({...c,x:Number(e.target.value)}))}/></label><label>上下<input type="range" min="0" max="100" value={crop.y} onChange={e=>setCrop(c=>({...c,y:Number(e.target.value)}))}/></label><small>この正方形がそのままパズルになります。</small></fieldset>}
         <label className="field">
           <span>パズル名</span>
           <input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={40} placeholder="例：公園で見つけた宝物" />

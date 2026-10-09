@@ -4,6 +4,7 @@ import { useJigsawDrag } from "../hooks/useJigsawDrag";
 import type { JigsawPieceState } from "../types/puzzle";
 
 type JigsawFreePieceProps = {
+  scale?: number;
   piece: JigsawPieceState;
   gridSize: number;
   imageUrl: string;
@@ -14,6 +15,7 @@ type JigsawFreePieceProps = {
 
 export function JigsawFreePiece({
   piece,
+  scale = 1,
   gridSize,
   imageUrl,
   onDragStart,
@@ -22,7 +24,7 @@ export function JigsawFreePiece({
 }: JigsawFreePieceProps) {
   const clipId = useId().replace(/:/g, "");
   const path = createJigsawPath(piece.width, piece.height, piece.shape);
-  const dragHandlers = useJigsawDrag({ piece, onDragStart, onDragMove, onDragEnd });
+  const dragHandlers = useJigsawDrag({ scale, piece, onDragStart, onDragMove, onDragEnd });
   const tabPadding = Math.min(piece.width, piece.height) * 0.22;
 
   return (

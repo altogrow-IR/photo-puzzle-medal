@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { loadProgress } from "../lib/progress";
+import { resizeImageToBlob } from "../lib/imageUtils";
 import { getImage } from "../lib/db";
 import { PUZZLE_MODE_LABELS } from "../lib/puzzleMode";
 import type { PuzzleItem } from "../types/puzzle";
@@ -31,11 +33,13 @@ export function PuzzleCard({ puzzle, onPlay, onDelete }: PuzzleCardProps) {
     let objectUrl = "";
 
     getImage(puzzle.thumbnailId)
-      .then((image) => {
+      .then(async (image) => {
         if (!isMounted || !image) {
           return;
         }
-        objectUrl = URL.createObjectURL(image.blob);
+        const blob = await resizeImageToBlob(image.blob, 1200);
+        if (!isMounted) return;
+        objectUrl = URL.createObjectURL(blob);
         setThumbnailUrl(objectUrl);
       })
       .catch(() => {
@@ -82,11 +86,12 @@ export function PuzzleCard({ puzzle, onPlay, onDelete }: PuzzleCardProps) {
       </div>
       <div className="card-actions">
         <button className="primary-button" type="button" onClick={() => onPlay(puzzle)}>
-          遊ぶ
+          {loadProgress(puzzle) ? "つづきから" : "遊ぶ"}
         </button>
+        <details className="management-menu"><summary aria-label={`${puzzle.title}の管理`}>管理 ⋯</summary>
         <button className="danger-button" type="button" onClick={() => onDelete(puzzle)}>
-          削除
-        </button>
+          このパズルを削除
+        </button></details>
       </div>
     </article>
   );

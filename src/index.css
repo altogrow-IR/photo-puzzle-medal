@@ -753,3 +753,105 @@ dd {
     min-height: 560px;
   }
 }
+/* Keep the photo collection and game board in the foreground. */
+.hero { padding: 14px 18px; box-shadow: none; }
+.hero h1 { font-size: clamp(1.25rem, 3vw, 1.8rem); line-height: 1.4; }
+.hero .medal-display { padding: 8px 12px; display: flex; gap: 8px; align-items: center; }
+.hero .medal-icon { font-size: 1.6rem; }
+.hero .medal-content { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.hero .medal-content > .eyebrow { display: none; }
+.hero .medal-display strong { font-size: 1.3rem; }
+.hero .title-badge { padding: 4px 8px; }
+.hero .title-badge span { display: none; }
+.hero .title-badge b, .hero .next-title { font-size: .85rem; }
+.home-actions { margin: 14px 0 22px; }
+.puzzle-card h3, .play-header h2 { overflow-wrap: anywhere; }
+.card-actions { align-items: start; }
+.card-actions > .management-menu { flex: 0 0 auto; }
+summary { cursor: pointer; font-weight: 800; padding: 12px; min-height: 48px; }
+.management-menu { position: relative; }
+.management-menu summary { border: 1px solid #b5b5a3; border-radius: 8px; }
+.management-menu .danger-button { position: absolute; right: 0; top: 55px; width: 190px; z-index: 5; box-shadow: var(--shadow); }
+.how-to .section-heading { margin-top: 12px; }
+.preview-box { width: min(100%, 400px); aspect-ratio: 1; min-height: 0; margin: auto; }
+.preview-box img { display: block; min-width: 0; min-height: 0; }
+.crop-controls { border: 0; padding: 0; display: grid; gap: 8px; }
+.crop-controls label { display: flex; align-items: center; gap: 16px; }
+.crop-controls input { flex: 1; min-width: 0; min-height: 44px; }
+.operation-hint { font-size: .9rem; margin: 8px 0; color: var(--ink-soft); }
+.jigsaw-stage { width: min(100%, 600px); aspect-ratio: 1; height: auto; min-height: 0; border: 0; outline: 2px solid #5d3515; }
+.jigsaw-logical { position: relative; transform-origin: top left; }
+.jigsaw-target-board { pointer-events: none; }
+.tray-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 12px 0 8px; }
+.tray-heading button { min-height: 44px; padding: 8px 12px; font-size: .85rem; }
+.piece-tray { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 10px; max-height: 170px; overflow-y: auto; padding: 6px; border-radius: 8px; background: #efe7d2; overscroll-behavior: contain; }
+.tray-piece { padding: 0; aspect-ratio: 1; min-height: 48px; background-repeat: no-repeat; border: 2px solid white; border-radius: 5px; touch-action: pan-y; }
+.tray-piece.selected { outline: 3px solid #c77a16; outline-offset: 1px; }
+button:focus-visible, summary:focus-visible, input:focus-visible { outline: 3px solid #7b5cc8; outline-offset: 3px; }
+@media (max-width:760px) {
+ .app-shell { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+ .hero { padding: 10px; gap: 8px; }
+ .hero .medal-display { padding: 6px; }
+ .hero .medal-icon { display: none; }
+ .play-screen { padding: 10px; }
+ .play-header { gap: 8px; margin-bottom: 8px; }
+ .play-header h2 { font-size: 1.15rem; }
+ .play-actions > * { flex: 1; min-height: 44px; padding: 8px; }
+ .play-stats { gap: 6px; margin-bottom: 6px; }
+ .play-stats span { min-height: 32px; padding: 5px 8px; font-size: .85rem; }
+ .sample-panel { grid-template-columns: 70px 1fr; padding: 8px; }
+ .piece-tray { max-height: 145px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* Tablet: use the space beside the board for pieces and the reference photo. */
+@media (min-width: 761px) and (max-width: 1366px) {
+  .app-shell { width: min(1120px, calc(100% - 20px)); padding-top: 12px; padding-bottom: 24px; }
+  .play-screen { padding: 14px; }
+  .play-header { gap: 12px; margin-bottom: 10px; }
+  .play-header h2 { font-size: 1.4rem; }
+  .play-actions > * { min-height: 44px; padding: 8px 12px; }
+  .play-stats { margin-bottom: 0; gap: 8px; }
+  .play-stats span { min-height: 36px; padding: 7px 10px; }
+  .jigsaw-layout {
+    grid-template-columns: minmax(0, 1fr) clamp(190px, 23vw, 260px);
+    grid-template-areas: "stats stats" "feedback feedback" "board tools" "board sample";
+    grid-template-rows: auto auto auto 1fr;
+    gap: 10px 14px;
+  }
+  .jigsaw-main { display: contents; }
+  .jigsaw-main > .play-stats { grid-area: stats; }
+  .jigsaw-feedback { grid-area: feedback; }
+  .jigsaw-feedback .operation-hint { margin: 0; }
+  .jigsaw-stage { grid-area: board; width: 100%; }
+  .jigsaw-tools { grid-area: tools; min-width: 0; }
+  .tray-heading { margin: 0 0 8px; flex-wrap: wrap; }
+  .piece-tray { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); max-height: clamp(200px, calc(100vw - 440px), 400px); gap: 8px; }
+  .jigsaw-layout > .sample-panel { grid-area: sample; }
+  .play-layout { grid-template-columns: minmax(0, 1fr) clamp(150px, 18vw, 200px); gap: 14px; }
+  .play-layout .puzzle-board { width: 100%; }
+  .sample-panel { padding: 10px; gap: 8px; }
+  .jigsaw-layout .sample-panel { grid-template-columns: 80px minmax(0, 1fr); align-items: center; }
+  .jigsaw-layout .sample-panel .eyebrow { grid-column: 1 / -1; }
+  .puzzle-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+}
+/* A tall tablet can use a full-width board; a wide tablet fits its height. */
+@media (min-width: 761px) and (max-width: 1366px) {
+  .jigsaw-logical { position: absolute; top: 0; left: 0; }
+}
+@media (min-width: 761px) and (max-width: 1366px) and (orientation: portrait) {
+  .jigsaw-layout {
+    grid-template-columns: minmax(0, 1fr) 160px;
+    grid-template-areas: "stats stats" "feedback feedback" "board board" "tools sample";
+    grid-template-rows: auto auto auto auto;
+  }
+  .jigsaw-stage { width: min(100%, calc(100dvh - 400px)); justify-self: center; }
+  .piece-tray { max-height: 160px; }
+  .jigsaw-layout .sample-panel { grid-template-columns: 1fr; }
+  .jigsaw-layout .sample-panel img { width: 80px; height: 80px; }
+}
+@media (min-width: 761px) and (max-width: 1366px) and (orientation: landscape) {
+  .jigsaw-layout { grid-template-columns: minmax(0, min(68%, calc(100dvh - 180px))) minmax(190px, 1fr); }
+  .piece-tray { max-height: clamp(160px, calc(100dvh - 380px), 400px); }
+  .play-layout { grid-template-columns: minmax(0, min(78%, calc(100dvh - 180px))) minmax(150px, 1fr); }
+  .play-layout .sample-panel img { max-width: 200px; }
+}

@@ -26,11 +26,12 @@ export const resizeImageToBlob = async (
   maxSize: number,
   mimeType = "image/jpeg",
   quality = 0.88,
+  crop = { x: 50, y: 50 },
 ): Promise<Blob> => {
   const image = await loadImage(source);
-  const scale = Math.min(1, maxSize / Math.max(image.naturalWidth, image.naturalHeight));
-  const width = Math.max(1, Math.round(image.naturalWidth * scale));
-  const height = Math.max(1, Math.round(image.naturalHeight * scale));
+  const side = Math.min(image.naturalWidth, image.naturalHeight);
+  const width = Math.max(1, Math.min(maxSize, side));
+  const height = width;
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
@@ -40,7 +41,7 @@ export const resizeImageToBlob = async (
     throw new Error("Canvasを利用できないため、画像を保存できませんでした。");
   }
 
-  context.drawImage(image, 0, 0, width, height);
+  context.drawImage(image, (image.naturalWidth-side)*crop.x/100, (image.naturalHeight-side)*crop.y/100, side, side, 0, 0, width, height);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(
